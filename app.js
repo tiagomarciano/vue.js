@@ -1,3 +1,11 @@
+Vue.filter('doneLabel', function(value) {
+    if (value == 0) {
+        return "Não paga";
+    } else {
+        return "Paga";
+    }
+});
+
 var app = new Vue({
     el: "#app",
     data: {
@@ -8,17 +16,19 @@ var app = new Vue({
             {id: 1, name: "Criar conta"}
         ],
         activedView: 0,
+        formType: 'insert',
         bill: {
             date_due: '',
             name: '',
-            value: 0
+            value: 0,
+            done: 0
         },
         names: [
             'Conta de luz',
             'Conta de água',
             'Conta de telefone',
             'Supermercado',
-            'Cartão de crédito',
+            'Cartão de Crédito',
             'Empréstimo',
             'Gasolina'
         ],
@@ -45,18 +55,37 @@ var app = new Vue({
         }
     },
     methods: {
-        showView: function($event,id) {
-            $event.preventDefault();
+        showView: function(id) {
             this.activedView = id;
-            console.log(id);
+            if(id == 1) {
+                this.formType = 'insert';
+            }
         },
         submit: function() {
-            this.bills.push(this.bill);
+            if (this.formType == 'insert') {
+                this.bills.push(this.bill);
+            }
+
+            this.bill = {
+                date_due: '',
+                name: '',
+                value: 0,
+                done: 0
+            };
+
             this.activedView = 0;
+        },
+        loadBill: function(bill) {
+            this.bill = bill;
+            this.activedView = 1;
+            this.formType = 'update';
         }
     }
-})
+});
 
+
+
+/*
 app.$watch('test', function(newValue, oldValue) {
     console.log('oldValue: ' + oldValue + ' newValue: ' + newValue)
-})
+})*/
