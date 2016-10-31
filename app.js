@@ -38,3 +38,7 @@ var app = new Vue({
         }
     }
 })
+
+app.$watch('test', function(newValue, oldValue) {
+    console.log('oldValue: ' + oldValue + ' newValue: ' + newValue)
+})
