@@ -8,6 +8,20 @@ var app = new Vue({
             {id: 1, name: "Criar conta"}
         ],
         activedView: 0,
+        bill: {
+            date_due: '',
+            name: '',
+            value: 0
+        },
+        names: [
+            'Conta de luz',
+            'Conta de água',
+            'Conta de telefone',
+            'Supermercado',
+            'Cartão de crédito',
+            'Empréstimo',
+            'Gasolina'
+        ],
         bills: [
             {date_due: '20/10/2016', name: 'Conta de luz', value: 120.00, done:1},
             {date_due: '21/10/2016', name: 'Conta de água', value: 40.00, done:0},
@@ -35,6 +49,10 @@ var app = new Vue({
             $event.preventDefault();
             this.activedView = id;
             console.log(id);
+        },
+        submit: function() {
+            this.bills.push(this.bill);
+            this.activedView = 0;
         }
     }
 })
