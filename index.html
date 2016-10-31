@@ -41,7 +41,8 @@
 
     <div v-if="activedView == 1">
         <form name="form">
-            Test: <input type="text">
+            Test: <input type="text" v-model="test">
+            {{ test }}
         </form>
     </div>
 

@@ -1,6 +1,7 @@
 var app = new Vue({
     el: "#app",
     data: {
+        test: '',
         title: "Contas à pagar",
         menus: [
             {id: 0, name: "Listar contas"},
