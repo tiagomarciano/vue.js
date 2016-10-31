@@ -10,14 +10,20 @@
         .nao-pago {
             color: red;
         }
+        .sem-conta {
+            color: gray;
+        }
         .minha-classe {
             background-color: antiquewhite;
+        }
+        a {
+            color: dodgerblue;
         }
     </style>
 </head>
 <body id="app">
     <h1>{{ title }}</h1>
-    <h3>{{ status }}</h3>
+    <h3 :class="{'pago': !status, 'nao-pago': status, 'sem-conta': !hasDebts}">{{ status | statusLabel }}</h3>
 
     <nav>
         <ul>
@@ -49,7 +55,14 @@
                     {{ o.done | doneLabel }}
                 </td>
                 <td>
-                    <a href="#" @click.prevent="loadBill(o)">Editar</a>
+                    <a href="#" @click.prevent="loadBill(o)">Editar</a> |
+                    <a href="#" @click.prevent="removeBill(index)">Remover</a> |
+                    <span v-if="o.done == 0">
+                        <a href="#" @click.prevent="changeStatusBill(o)">Baixar</a>
+                    </span>
+                    <span v-else>
+                        <a href="#" @click.prevent="changeStatusBill(o)">Não Pago</a>
+                    </span>
                 </td>
             </tr>
             </tbody>
