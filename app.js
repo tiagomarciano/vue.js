@@ -18,41 +18,150 @@ Vue.filter('statusGeneral', function (value) {
     }
 });
 
-var app = new Vue({
-    el: "#app",
-    data: {
-        test: '',
-        title: "Contas à pagar",
-        menus: [
-            {id: 0, name: "Listar contas"},
-            {id: 1, name: "Criar conta"}
-        ],
-        activedView: 0,
-        formType: 'insert',
-        bill: {
-            date_due: '',
-            name: '',
-            value: 0,
-            done: 0
-        },
-        names: [
-            'Conta de luz',
-            'Conta de água',
-            'Conta de telefone',
-            'Supermercado',
-            'Cartão de Crédito',
-            'Empréstimo',
-            'Gasolina'
-        ],
-        bills: [
-            {date_due: '20/10/2016', name: 'Conta de luz', value: 120.00, done:1},
-            {date_due: '21/10/2016', name: 'Conta de água', value: 40.00, done:1},
-            {date_due: '22/10/2016', name: 'Conta de telefone', value: 50.00, done:1},
-            {date_due: '23/10/2016', name: 'Supermercado', value: 825.99, done:1},
-            {date_due: '24/10/2016', name: 'Cartão de Crédito', value: 500.99, done:1},
-            {date_due: '25/10/2016', name: 'Empréstimo', value: 380.28, done:1},
-            {date_due: '26/10/2016', name: 'Gasolina', value: 200.00, done:1}
-        ]
+var menuComponent = Vue.extend({
+    template: `
+    <nav>
+        <ul>
+            <li v-for="o in menus">
+                <a href="#" @click.prevent="showView(o.id)">{{ o.name }}</a>
+            </li>
+        </ul>
+    </nav>`,
+    data: function() {
+        return {
+            menus: [
+                {id: 0, name: "Listar contas"},
+                {id: 1, name: "Criar conta"}
+            ]
+        };
+    },
+    methods: {
+        showView: function(id) {
+            this.$root.$children[0].activedView = id;
+            if(id == 1) {
+                this.$parent.formType = 'insert';
+            }
+        }
+    }
+})
+
+Vue.component('menu-component', menuComponent);
+
+var appComponent = Vue.extend({
+    template: `
+        <style type="text/css">
+        .pago {
+            color: green;
+        }
+        .nao-pago {
+            color: red;
+        }
+        .sem-conta {
+            color: gray;
+        }
+        .minha-classe {
+            background-color: antiquewhite;
+        }
+        a {
+            color: dodgerblue;
+        }
+    </style>
+        <h1>{{ title }}</h1>
+        <h3 :class="{'pago': !status, 'nao-pago': status, 'sem-conta': status === false}">{{ status | statusGeneral }}</h3>
+        
+        <menu-component></menu-component>
+    
+        <div v-if="activedView == 0">
+            <table border="1" cellpadding="10">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vencimento</th>
+                    <th>Nome</th>
+                    <th>Valor</th>
+                    <th>Pago?</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(index,o) in bills">
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ o.date_due }}</td>
+                    <td>{{ o.name }}</td>
+                    <td>{{ o.value | currency 'R$ ' 2 }}</td>
+                    <td class="minha-classe" :class="{'pago': o.done, 'nao-pago': !o.done}">
+                        {{ o.done | doneLabel }}
+                    </td>
+                    <td>
+                        <a href="#" @click.prevent="loadBill(o)">Editar</a> |
+                        <a href="#" @click.prevent="removeBill(o)">Remover</a> |
+                        <span v-if="o.done == 0">
+                            <a href="#" @click.prevent="changeStatusBill(o)">Baixar</a>
+                        </span>
+                        <span v-else>
+                            <a href="#" @click.prevent="changeStatusBill(o)">Não Pago</a>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    
+        <div v-if="activedView == 1">
+            <form name="form" @submit.prevent="submit">
+                <label>Vencimento:</label>
+                <input type="text" v-model="bill.date_due">
+                <br><br>
+    
+                <label>Nome:</label>
+                <select v-model="bill.name">
+                    <option v-for="o in names" :value="o">{{ o }}</option>
+                </select>
+                <br><br>
+    
+                <label>Valor:</label>
+                <input type="text" v-model="bill.value">
+                <br><br>
+    
+                <label>Pago?</label>
+                <input type="checkbox" v-model="bill.done">
+                <br><br>
+    
+                <input type="submit" value="Salvar">
+    
+            </form>
+        </div>`,
+    data: function(){
+        return {
+            title: "Contas à pagar",
+
+            activedView: 0,
+            formType: 'insert',
+            bill: {
+                date_due: '',
+                name: '',
+                value: 0,
+                done: 0
+            },
+            names: [
+                'Conta de luz',
+                'Conta de água',
+                'Conta de telefone',
+                'Supermercado',
+                'Cartão de Crédito',
+                'Empréstimo',
+                'Gasolina'
+            ],
+            bills: [
+                {date_due: '20/10/2016', name: 'Conta de luz', value: 120.00, done: 1},
+                {date_due: '21/10/2016', name: 'Conta de água', value: 40.00, done: 1},
+                {date_due: '22/10/2016', name: 'Conta de telefone', value: 50.00, done: 1},
+                {date_due: '23/10/2016', name: 'Supermercado', value: 825.99, done: 1},
+                {date_due: '24/10/2016', name: 'Cartão de Crédito', value: 500.99, done: 1},
+                {date_due: '25/10/2016', name: 'Empréstimo', value: 380.28, done: 1},
+                {date_due: '26/10/2016', name: 'Gasolina', value: 200.00, done: 1}
+            ]
+        };
     },
     computed: {
         status: function() {
@@ -71,12 +180,6 @@ var app = new Vue({
         }
     },
     methods: {
-        showView: function(id) {
-            this.activedView = id;
-            if(id == 1) {
-                this.formType = 'insert';
-            }
-        },
         submit: function() {
             if (this.formType == 'insert') {
                 this.bills.push(this.bill);
@@ -106,6 +209,8 @@ var app = new Vue({
     }
 });
 
-/*app.$watch('test', function(newValue, oldValue) {
-    console.log('oldValue: ' + oldValue + ' newValue: ' + newValue)
-})*/
+Vue.component('app-component', appComponent);
+
+var app = new Vue({
+    el: "#app",
+});
