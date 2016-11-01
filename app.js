@@ -6,6 +6,18 @@ Vue.filter('doneLabel', function(value) {
     }
 });
 
+Vue.filter('statusGeneral', function (value) {
+    if (value === false){
+        return "Nenhuma conta cadastrada.";
+    }
+
+    if (!value) {
+        return "Nenhuma conta a pagar.";
+    } else {
+        return "Existem "+ value +" conta(s) a serem paga(s)";
+    }
+});
+
 var app = new Vue({
     el: "#app",
     data: {
@@ -17,7 +29,6 @@ var app = new Vue({
         ],
         activedView: 0,
         formType: 'insert',
-        hasDebts: false,
         bill: {
             date_due: '',
             name: '',
@@ -45,8 +56,6 @@ var app = new Vue({
     },
     computed: {
         status: function() {
-            this.hasDebts = false;
-
             if (this.bills.length > 0) {
                 var count = 0;
 
@@ -55,7 +64,6 @@ var app = new Vue({
                         count++;
                 }
 
-                this.hasDebts = true;
                 return count;
             }
 
@@ -88,25 +96,12 @@ var app = new Vue({
             this.activedView = 1;
             this.formType = 'update';
         },
-        removeBill: function(index) {
+        removeBill: function(bill) {
             if (confirm('Deseja remover o registro?'))
-                this.bills.splice(index,1);
+                this.bills.$remove(bill);
         },
         changeStatusBill: function(bill) {
-            console.log(bill.done);
-
             bill.done = bill.done ? 0 : 1;
-        }
-    },
-    filters: {
-        'statusLabel': function (value) {
-            if (value == 0 && this.hasDebts) {
-                return "Nenhuma conta para pagar";
-            } else if (value > 0) {
-                return "Existe(m) " + value + " conta(s) a pagar";
-            } else {
-                return "Nenhuma conta cadastrada";
-            }
         }
     }
 });

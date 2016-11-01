@@ -23,7 +23,7 @@
 </head>
 <body id="app">
     <h1>{{ title }}</h1>
-    <h3 :class="{'pago': !status, 'nao-pago': status, 'sem-conta': !hasDebts}">{{ status | statusLabel }}</h3>
+    <h3 :class="{'pago': !status, 'nao-pago': status, 'sem-conta': status === false}">{{ status | statusGeneral }}</h3>
 
     <nav>
         <ul>
@@ -56,7 +56,7 @@
                 </td>
                 <td>
                     <a href="#" @click.prevent="loadBill(o)">Editar</a> |
-                    <a href="#" @click.prevent="removeBill(index)">Remover</a> |
+                    <a href="#" @click.prevent="removeBill(o)">Remover</a> |
                     <span v-if="o.done == 0">
                         <a href="#" @click.prevent="changeStatusBill(o)">Baixar</a>
                     </span>
@@ -85,7 +85,11 @@
             <input type="text" v-model="bill.value">
             <br><br>
 
-            <input type="submit" value="Enviar">
+            <label>Pago?</label>
+            <input type="checkbox" v-model="bill.done">
+            <br><br>
+
+            <input type="submit" value="Salvar">
 
         </form>
     </div>
