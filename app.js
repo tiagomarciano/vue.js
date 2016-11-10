@@ -37,9 +37,9 @@ var menuComponent = Vue.extend({
     },
     methods: {
         showView: function(id) {
-            this.$root.$children[0].activedView = id;
+            this.$dispatch('change-activedview', id);
             if(id == 1) {
-                this.$parent.formType = 'insert';
+                this.$dispatch('change-formtype','insert');
             }
         }
     }
@@ -105,8 +105,8 @@ var billListComponent = Vue.extend({
     methods: {
         loadBill: function(bill) {
             this.$parent.bill = bill;
-            this.$parent.activedView = 1;
-            this.$parent.formType = 'update';
+            this.$dispatch('change-activedview', 1);
+            this.$dispatch('change-formtype','update');
         },
         removeBill: function(bill) {
             if (confirm('Deseja remover o registro?'))
@@ -142,9 +142,10 @@ var billCreateComponent = Vue.extend({
             <input type="submit" value="Salvar">
         </form>
     `,
-    props: ['bill','formType'],
+    props: ['bill'],
     data: function() {
         return {
+            formType: 'insert',
             names: [
                 'Conta de luz',
                 'Conta de água',
@@ -170,6 +171,11 @@ var billCreateComponent = Vue.extend({
             };
 
             this.$parent.activedView = 0;
+        }
+    },
+    events: {
+        'change-formtype': function(formType) {
+            this.formType = formType;
         }
     }
 });
@@ -206,14 +212,14 @@ var appComponent = Vue.extend({
         </div>
     
         <div v-show="activedView == 1">
-            <bill-create-component :bill.sync="bill" v-bind:form-type="formType"></bill-create-component>    
+            <bill-create-component :bill.sync="bill"></bill-create-component>    
         </div>`,
     data: function(){
         return {
             title: "Contas à pagar",
 
             activedView: 0,
-            formType: 'insert',
+
             bill: {
                 date_due: '',
                 name: '',
@@ -242,9 +248,14 @@ var appComponent = Vue.extend({
             return false;
         }
     },
-    methods: {
-
-
+    methods: {},
+    events: {
+        'change-activedview': function(activedView) {
+            this.activedView = activedView;
+        },
+        'change-formtype': function(formType) {
+            this.$broadcast('change-formtype',formType);
+        }
     }
 });
 
