@@ -104,7 +104,7 @@ var billListComponent = Vue.extend({
     },
     methods: {
         loadBill: function(bill) {
-            this.$parent.bill = bill;
+            this.$dispatch('change-bill', bill);
             this.$dispatch('change-activedview', 1);
             this.$dispatch('change-formtype','update');
         },
@@ -114,6 +114,11 @@ var billListComponent = Vue.extend({
         },
         changeStatusBill: function(bill) {
             bill.done = bill.done ? 0 : 1;
+        }
+    },
+    events: {
+        'new-bill': function(bill) {
+            this.bills.push(bill);
         }
     }
 });
@@ -142,7 +147,6 @@ var billCreateComponent = Vue.extend({
             <input type="submit" value="Salvar">
         </form>
     `,
-    props: ['bill'],
     data: function() {
         return {
             formType: 'insert',
@@ -154,13 +158,19 @@ var billCreateComponent = Vue.extend({
                 'Cartão de Crédito',
                 'Empréstimo',
                 'Gasolina'
-            ]
+            ],
+            bill: {
+                date_due: '',
+                name: '',
+                value: 0,
+                done: 0
+            }
         };
     },
     methods: {
         submit: function() {
             if (this.formType == 'insert') {
-                this.$parent.$refs.billListComponent.bills.push(this.bill);
+                this.$dispatch('new-bill', this.bill);
             }
 
             this.bill = {
@@ -170,12 +180,15 @@ var billCreateComponent = Vue.extend({
                 done: 0
             };
 
-            this.$parent.activedView = 0;
+            this.$dispatch('change-activedview', 0);
         }
     },
     events: {
         'change-formtype': function(formType) {
             this.formType = formType;
+        },
+        'change-bill': function(bill) {
+            this.bill = bill;
         }
     }
 });
@@ -217,17 +230,7 @@ var appComponent = Vue.extend({
     data: function(){
         return {
             title: "Contas à pagar",
-
-            activedView: 0,
-
-            bill: {
-                date_due: '',
-                name: '',
-                value: 0,
-                done: 0
-            },
-
-
+            activedView: 0
         };
     },
     computed: {
@@ -255,6 +258,12 @@ var appComponent = Vue.extend({
         },
         'change-formtype': function(formType) {
             this.$broadcast('change-formtype',formType);
+        },
+        'change-bill': function(bill) {
+            this.$broadcast('change-bill', bill);
+        },
+        'new-bill': function(bill) {
+            this.$broadcast('new-bill', bill);
         }
     }
 });
